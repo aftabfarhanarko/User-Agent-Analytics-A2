@@ -1,10 +1,10 @@
 {
-  "totalRequests": 41,
+  "totalRequests": 48,
   "clients": {
     "Blocked Client": 3,
     "Thunder Client": 14,
     "Postman": 10,
-    "Chrome": 14
+    "Chrome": 21
   },
   "requests": [
     {
@@ -333,6 +333,62 @@
       "url": "/api/analytics",
       "client": "Postman",
       "userAgent": "PostmanRuntime/7.49.1",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:33:43.006Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:33:45.617Z",
+      "method": "GET",
+      "url": "/api/analytic",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:33:45.705Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:33:46.092Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:35:14.754Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:35:16.280Z",
+      "method": "GET",
+      "url": "/api/analytic",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T07:35:16.329Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Chrome",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
       "status": "Allowed"
     }
   ]
