@@ -4,16 +4,32 @@ const port = 3000;
 
 const userRouter = require("./router/user");
 const events = require("./router/event");
-const { isVaid, checkUserAgent } = require("./middleware/usermiddleware");
+const analytics = require("./router/analytics");
+
+const { isValid, checkUserAgent } = require("./middleware/usermiddleware");
+const { blockClient } = require("./middleware/blockMiddleware");
+
+const saveUserAgent = require("./utils/logger");
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use("/api/user", isVaid, checkUserAgent, userRouter);
-app.use("/api/event", events);
+// User-Agent analytics for all routes
+app.use((req, res, next) => {
+  saveUserAgent(req);
+  next();
+});
 
+// Block unwanted clients middleware
+app.use(blockClient);
+
+// Routes
+app.use("/api/user", isValid, checkUserAgent, userRouter);
+app.use("/api/event", events);
+app.use("/api/analytics", analytics);
+
+// Start server
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

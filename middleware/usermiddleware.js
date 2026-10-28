@@ -1,5 +1,5 @@
 // Validations
-const isVaid = (req, res, next) => {
+const isValid = (req, res, next) => {
   console.log(req.query.token);
   if (req.query.token === "123") {
     return next();
@@ -12,8 +12,8 @@ const checkUserAgent = (req, res, next) => {
   console.log(req.headers["user-agent"]);
   next();
 };
-
 module.exports = {
-  isVaid,
+  isValid,
+  isVaid: isValid,
   checkUserAgent,
 };

@@ -1,0 +1,154 @@
+{
+  "totalRequests": 18,
+  "clients": {
+    "Blocked Client": 1,
+    "Thunder Client": 14,
+    "Postman": 3
+  },
+  "requests": [
+    {
+      "timestamp": "2026-10-28T06:49:58.340Z",
+      "method": "GET",
+      "url": "/api/user",
+      "client": "Blocked Client",
+      "userAgent": "curl/8.18.0",
+      "status": "Blocked"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:34.944Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:35.139Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:35.329Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:35.529Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:35.705Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:35.893Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:36.074Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:36.286Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:36.474Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:36.660Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:36.854Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:37.068Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:37.238Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:37.421Z",
+      "method": "GET",
+      "url": "/api/analytics",
+      "client": "Thunder Client",
+      "userAgent": "Thunder Client (https://www.thunderclient.com)",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:50:51.264Z",
+      "method": "GET",
+      "url": "/api/user",
+      "client": "Postman",
+      "userAgent": "PostmanRuntime/7.49.1",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:51:03.622Z",
+      "method": "GET",
+      "url": "/api/user?token=123",
+      "client": "Postman",
+      "userAgent": "PostmanRuntime/7.49.1",
+      "status": "Allowed"
+    },
+    {
+      "timestamp": "2026-10-28T06:51:06.096Z",
+      "method": "GET",
+      "url": "/api/user?token=123",
+      "client": "Postman",
+      "userAgent": "PostmanRuntime/7.49.1",
+      "status": "Allowed"
+    }
+  ]
+}
