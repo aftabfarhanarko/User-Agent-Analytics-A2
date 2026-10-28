@@ -5,6 +5,7 @@ const port = 3000;
 const userRouter = require("./router/user");
 const events = require("./router/event");
 const analytics = require("./router/analytics");
+const { renderAnalyticsChart } = require("./controllers/analyticsController");
 
 const { isValid, checkUserAgent } = require("./middleware/usermiddleware");
 const { blockClient } = require("./middleware/blockMiddleware");
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 app.use(blockClient);
 
 // Routes
+app.get("/api/analytic", renderAnalyticsChart);
 app.use("/api/user", isValid, checkUserAgent, userRouter);
 app.use("/api/event", events);
 app.use("/api/analytics", analytics);

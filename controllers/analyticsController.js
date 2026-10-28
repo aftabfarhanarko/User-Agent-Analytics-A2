@@ -3,7 +3,7 @@ const path = require("path");
 
 const logFilePath = path.join(__dirname, "../logs/user-agents.json");
 
-// Analytic route
+// JSON API: Get all analytics data
 const getAllAnalytics = (req, res) => {
   if (!fs.existsSync(logFilePath)) {
     return res.json({
@@ -26,4 +26,12 @@ const getAllAnalytics = (req, res) => {
   );
 };
 
-module.exports = { getAllAnalytics };
+// HTML View: Render the Bar Chart page
+const renderAnalyticsChart = (req, res) => {
+  res.sendFile(path.join(__dirname, "../views/analytics.html"));
+};
+
+module.exports = {
+  getAllAnalytics,
+  renderAnalyticsChart,
+};

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex, nofollow">
+  <title>User-Agent Analytics</title>
+  <style>
+    :root {
+      --bg: #eef1f4;
+      --surface: #ffffff;
+      --surface-2: #f4f6f8;
+      --line: #d9dfe5;
+      --ink: #14202b;
+      --muted: #5b6b79;
+      --accent: #0f766e;
+      --accent-soft: #cdebe7;
+      --block: #b8410f;
+      --block-soft: #f6dccf;
+      --focus: #1d4ed8;
+      --shadow: 0 1px 2px rgba(20, 32, 43, .06), 0 8px 24px -12px rgba(20, 32, 43, .18);
+      --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0e141a;
+        --surface: #161f28;
+        --surface-2: #1c2732;
+        --line: #2a3745;
+        --ink: #e8eef3;
+        --muted: #9aabba;
+        --accent: #5fd3c4;
+        --accent-soft: #17413d;
+        --block: #ff9a62;
+        --block-soft: #4a2a19;
+        --focus: #8ab4ff;
+        --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .6);
+      }
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 15px/1.5 var(--font);
+      font-variant-numeric: tabular-nums;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    /* Header */
+    .top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 56ch;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .status[data-state="live"] .dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 0 var(--accent);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    .status[data-state="error"] .dot {
+      background: var(--block);
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+      }
+
+      70%,
+      100% {
+        box-shadow: 0 0 0 8px transparent;
+      }
+    }
+
+    button {
+      font: 600 .875rem/1 var(--font);
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+
+    button:hover {
+      background: var(--surface-2);
+      border-color: var(--muted);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: progress;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    /* Error banner */
+    .banner {
+      display: none;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: var(--block-soft);
+      color: var(--ink);
+      border: 1px solid var(--block);
+      font-size: .9rem;
+    }
+
+    .banner.show {
+      display: block;
+    }
+
+    /* KPIs */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .kpi dt {
+      font-size: .85rem;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .kpi dd {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .kpi dd.small {
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .kpi .hint {
+      display: block;
+      margin-top: 4px;
+      font-size: .8rem;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--muted);
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 650;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+    }
+
+    /* Table */
+    .table-scroll {
+      max-height: 420px;
+      overflow: auto;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    th,
+    td {
+      padding: 11px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--surface-2);
+      font-weight: 600;
+      color: var(--muted);
+      font-size: .8rem;
+      z-index: 1;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td.num,
+    th.num {
+      text-align: right;
+    }
+
+    .client {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .client span.name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 36ch;
+    }
+
+    .tag {
+      flex: none;
+      font-size: .72rem;
+      font-weight: 650;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--block-soft);
+      color: var(--block);
+      border: 1px solid var(--block);
+    }
+
+    .share {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 140px;
+    }
+
+    .share .track {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .share .fill {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .5s ease;
+    }
+
+    .share .fill.blocked {
+      background: var(--block);
+    }
+
+    .share .pct {
+      width: 48px;
+      text-align: right;
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    /* States */
+    .empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+    }
+
+    .empty strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .skeleton {
+      display: block;
+      height: 14px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2));
+      background-size: 200% 100%;
+      animation: shimmer 1.4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .is-loading .kpi dd {
+      color: transparent;
+    }
+
+    .is-loading .kpi dd::after {
+      content: "";
+      display: block;
+      height: 28px;
+      width: 60%;
+      border-radius: 6px;
+      background: var(--surface-2);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 820px) {
+      .kpis {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .wrap {
+        padding: 20px 14px 48px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .share {
+        min-width: 100px;
+      }
+
+      .client span.name {
+        max-width: 18ch;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap is-loading" id="app">
+    <header class="top">
+      <div>
+        <h1>User-Agent Analytics</h1>
+        <p class="sub">Incoming requests grouped by client, including the ones your rules blocked.</p>
+      </div>
+      <div class="controls">
+        <span class="status" id="status" data-state="idle" role="status" aria-live="polite">
+          <span class="dot" aria-hidden="true"></span><span id="statusText">Connecting…</span>
+        </span>
+        <button type="button" id="refresh">Refresh</button>
+      </div>
+    </header>
+
+    <div class="banner" id="banner" role="alert"></div>
+
+    <dl class="kpis">
+      <div class="kpi">
+        <dt>Total requests</dt>
+        <dd id="kTotal">0</dd>
+      </div>
+      <div class="kpi">
+        <dt>Unique clients</dt>
+        <dd id="kClients">0</dd>
+      </div>
+      <div class="kpi">
+        <dt>Blocked share</dt>
+        <dd id="kBlocked">0%<span class="hint" id="kBlockedHint"></span></dd>
+      </div>
+      <div class="kpi">
+        <dt>Top client</dt>
+        <dd class="small" id="kTop">—<span class="hint" id="kTopHint"></span></dd>
+      </div>
+    </dl>
+
+    <section class="panel" aria-labelledby="chartTitle">
+      <div class="panel-head">
+        <h2 id="chartTitle">Requests by client</h2>
+        <div class="legend" aria-hidden="true">
+          <span><i style="background:var(--accent)"></i>Allowed</span>
+          <span><i style="background:var(--block)"></i>Blocked</span>
+        </div>
+      </div>
+      <div class="chart-box" id="chartBox" hidden>
+        <canvas id="chart" role="img"
+          aria-label="Horizontal bar chart of requests per client. The same data is listed in the table below."></canvas>
+      </div>
+      <div class="empty" id="empty" hidden>
+        <strong>No requests recorded yet</strong>
+        Send a request to your server and this page will pick it up automatically.
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="tableTitle" id="tablePanel" hidden>
+      <div class="panel-head">
+        <h2 id="tableTitle">All clients</h2>
+      </div>
+      <div class="table-scroll" tabindex="0" role="region" aria-labelledby="tableTitle">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Client</th>
+              <th scope="col" class="num">Requests</th>
+              <th scope="col">Share of traffic</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer
+    crossorigin="anonymous"></script>
+  <script>
+    (() => {
+      'use strict';
+
+      const CONFIG = {
+        endpoint: '/api/analytics',
+        pollMs: 15000,
+        timeoutMs: 8000,
+        chartTopN: 8
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const nf = new Intl.NumberFormat();
+      const pf = (n) => (n >= 10 || n === 0 ? n.toFixed(0) : n.toFixed(1)) + '%';
+      const isBlocked = (name) => /blocked/i.test(name);
+
+      const el = {
+        app: $('app'), status: $('status'), statusText: $('statusText'), banner: $('banner'),
+        refresh: $('refresh'), total: $('kTotal'), clients: $('kClients'),
+        blocked: $('kBlocked'), blockedHint: $('kBlockedHint'), top: $('kTop'), topHint: $('kTopHint'),
+        chartBox: $('chartBox'), canvas: $('chart'), empty: $('empty'),
+        tablePanel: $('tablePanel'), rows: $('rows')
+      };
+
+      let chart = null;
+      let lastData = null;
+      let timer = null;
+      let inflight = null;
+      let lastOk = null;
+
+      /* ---------- Data ---------- */
+      function normalize(raw) {
+        const src = raw && typeof raw.clients === 'object' && raw.clients ? raw.clients : {};
+        const list = Object.entries(src)
+          .map(([name, v]) => ({ name: String(name), count: Number(v) }))
+          .filter((c) => Number.isFinite(c.count) && c.count >= 0)
+          .sort((a, b) => b.count - a.count);
+        const sum = list.reduce((s, c) => s + c.count, 0);
+        const reported = Number(raw && raw.totalRequests);
+        return { list, total: Number.isFinite(reported) && reported >= sum ? reported : sum };
+      }
+
+      async function load() {
+        if (inflight) inflight.abort();
+        const ctrl = new AbortController();
+        inflight = ctrl;
+        const t = setTimeout(() => ctrl.abort(), CONFIG.timeoutMs);
+        el.refresh.disabled = true;
+        try {
+          const res = await fetch(CONFIG.endpoint, {
+            headers: { Accept: 'application/json' },
+            cache: 'no-store',
+            signal: ctrl.signal
+          });
+          if (!res.ok) throw new Error('Server responded with ' + res.status);
+          lastData = normalize(await res.json());
+          lastOk = new Date();
+          setStatus('live', 'Live · updated ' + lastOk.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+          showBanner('');
+          render(lastData);
+        } catch (err) {
+          const msg = err.name === 'AbortError'
+            ? 'The analytics request timed out.'
+            : 'Could not load analytics (' + err.message + ').';
+          setStatus('error', 'Offline');
+          showBanner(msg + (lastData ? ' Showing the last data received. Retrying automatically.' : ' Retrying automatically.'));
+          if (!lastData) { el.app.classList.remove('is-loading'); renderEmpty(); }
+        } finally {
+          clearTimeout(t);
+          if (inflight === ctrl) inflight = null;
+          el.refresh.disabled = false;
+        }
+      }
+
+      /* ---------- UI helpers ---------- */
+      function setStatus(state, text) { el.status.dataset.state = state; el.statusText.textContent = text; }
+      function showBanner(text) { el.banner.textContent = text; el.banner.classList.toggle('show', !!text); }
+      function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+      function renderEmpty() {
+        el.chartBox.hidden = true; el.tablePanel.hidden = true; el.empty.hidden = false;
+      }
+
+      /* ---------- Render ---------- */
+      function render({ list, total }) {
+        el.app.classList.remove('is-loading');
+
+        const blockedCount = list.filter((c) => isBlocked(c.name)).reduce((s, c) => s + c.count, 0);
+        const blockedPct = total > 0 ? (blockedCount / total) * 100 : 0;
+
+        el.total.textContent = nf.format(total);
+        el.clients.textContent = nf.format(list.length);
+        el.blocked.firstChild.nodeValue = pf(blockedPct);
+        el.blockedHint.textContent = nf.format(blockedCount) + ' blocked';
+
+        if (list.length) {
+          el.top.firstChild.nodeValue = list[0].name;
+          el.top.title = list[0].name;
+          el.topHint.textContent = nf.format(list[0].count) + ' requests';
+        } else {
+          el.top.firstChild.nodeValue = '—';
+          el.topHint.textContent = '';
+        }
+
+        if (!list.length) { renderEmpty(); return; }
+        el.empty.hidden = true;
+        el.tablePanel.hidden = false;
+        renderTable(list, total);
+        renderChart(list);
+      }
+
+      function renderTable(list, total) {
+        const frag = document.createDocumentFragment();
+        for (const c of list) {
+          const pct = total > 0 ? (c.count / total) * 100 : 0;
+          const blocked = isBlocked(c.name);
+
+          const tr = document.createElement('tr');
+
+          const tdName = document.createElement('td');
+          const wrap = document.createElement('div');
+          wrap.className = 'client';
+          const name = document.createElement('span');
+          name.className = 'name';
+          name.textContent = c.name;
+          name.title = c.name;
+          wrap.appendChild(name);
+          if (blocked) {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = 'Blocked';
+            wrap.appendChild(tag);
+          }
+          tdName.appendChild(wrap);
+
+          const tdCount = document.createElement('td');
+          tdCount.className = 'num';
+          tdCount.textContent = nf.format(c.count);
+
+          const tdShare = document.createElement('td');
+          const share = document.createElement('div');
+          share.className = 'share';
+          const track = document.createElement('span');
+          track.className = 'track';
+          const fill = document.createElement('span');
+          fill.className = 'fill' + (blocked ? ' blocked' : '');
+          fill.style.width = Math.min(100, pct).toFixed(1) + '%';
+          track.appendChild(fill);
+          const label = document.createElement('span');
+          label.className = 'pct';
+          label.textContent = pf(pct);
+          share.append(track, label);
+          tdShare.appendChild(share);
+
+          tr.append(tdName, tdCount, tdShare);
+          frag.appendChild(tr);
+        }
+        el.rows.replaceChildren(frag);
+      }
+
+      function renderChart(list) {
+        // Chart.js is an enhancement: if the CDN is blocked, the table still shows everything.
+        if (!window.Chart) { el.chartBox.hidden = true; return; }
+
+        const top = list.slice(0, CONFIG.chartTopN);
+        const labels = top.map((c) => c.name);
+        const values = top.map((c) => c.count);
+        const accent = cssVar('--accent'), block = cssVar('--block');
+        const colors = top.map((c) => (isBlocked(c.name) ? block : accent));
+
+        el.chartBox.hidden = false;
+        el.chartBox.style.height = Math.max(200, top.length * 44 + 56) + 'px';
+
+        if (chart) chart.destroy();
+        chart = new Chart(el.canvas.getContext('2d'), {
+          type: 'bar',
+          data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false, barThickness: 22 }] },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500 },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: cssVar('--ink'),
+                titleColor: cssVar('--surface'),
+                bodyColor: cssVar('--surface'),
+                padding: 10,
+                displayColors: false,
+                callbacks: { label: (ctx) => nf.format(ctx.raw) + ' requests' }
+              }
+            },
+            scales: {
+              x: { beginAtZero: true, grid: { color: cssVar('--line') }, border: { display: false }, ticks: { color: cssVar('--muted'), precision: 0 } },
+              y: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: {
+                  color: cssVar('--ink'),
+                  callback(v) { const s = this.getLabelForValue(v); return s.length > 26 ? s.slice(0, 25) + '…' : s; }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      /* ---------- Polling ---------- */
+      function schedule() {
+        clearTimeout(timer);
+        timer = setTimeout(async () => { if (!document.hidden) await load(); schedule(); }, CONFIG.pollMs);
+      }
+
+      el.refresh.addEventListener('click', async () => { await load(); schedule(); });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); schedule(); } });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (lastData) renderChart(lastData.list); });
+
+      // Chart.js loads deferred; wait for it so the first render includes the chart.
+      window.addEventListener('DOMContentLoaded', async () => { await load(); schedule(); });
+      window.addEventListener('load', () => { if (lastData && !chart) renderChart(lastData.list); });
+    })();
+  </script>
+</body>
+
+</html>

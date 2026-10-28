@@ -48,6 +48,8 @@ Agent-Analytics/
 │   └── user.js
 ├── utils/                    # Helper utilities
 │   └── logger.js             # User-Agent parser & file logger
+├── views/                    # Frontend HTML views
+│   └── analytics.html        # Bar Chart analytics dashboard
 ├── logs/                     # Persistent storage for analytics
 │   └── user-agents.json
 ├── app.js                    # Application entry point
@@ -103,7 +105,13 @@ The server will start on `http://localhost:3000`.
 
 ### 1. User-Agent Analytics
 
-#### Get Aggregated Analytics & Request History
+#### Visual Bar Chart Dashboard
+Renders an interactive HTML dashboard with a Bar Chart showing request counts per client.
+
+- **Endpoint:** `GET /analytics`
+- **Response:** HTML Page (`views/analytics.html`) with Chart.js visualization.
+
+#### Get Aggregated Analytics (JSON API)
 Returns real-time analytics including total request counts, client breakdowns, and detailed request logs.
 
 - **Endpoint:** `GET /api/analytics`
