@@ -472,6 +472,9 @@
         <span class="status" id="status" data-state="idle" role="status" aria-live="polite">
           <span class="dot" aria-hidden="true"></span><span id="statusText">Connecting…</span>
         </span>
+        <button type="button" id="downloadCsv" title="Export analytics data as CSV">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download CSV
+        </button>
         <button type="button" id="refresh">Refresh</button>
       </div>
     </header>
@@ -554,7 +557,7 @@
 
       const el = {
         app: $('app'), status: $('status'), statusText: $('statusText'), banner: $('banner'),
-        refresh: $('refresh'), total: $('kTotal'), clients: $('kClients'),
+        refresh: $('refresh'), downloadCsv: $('downloadCsv'), total: $('kTotal'), clients: $('kClients'),
         blocked: $('kBlocked'), blockedHint: $('kBlockedHint'), top: $('kTop'), topHint: $('kTopHint'),
         chartBox: $('chartBox'), canvas: $('chart'), empty: $('empty'),
         tablePanel: $('tablePanel'), rows: $('rows')
@@ -575,7 +578,8 @@
           .sort((a, b) => b.count - a.count);
         const sum = list.reduce((s, c) => s + c.count, 0);
         const reported = Number(raw && raw.totalRequests);
-        return { list, total: Number.isFinite(reported) && reported >= sum ? reported : sum };
+        const requests = Array.isArray(raw && raw.requests) ? raw.requests : [];
+        return { list, total: Number.isFinite(reported) && reported >= sum ? reported : sum, requests };
       }
 
       async function load() {
@@ -616,11 +620,13 @@
       function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
       function renderEmpty() {
         el.chartBox.hidden = true; el.tablePanel.hidden = true; el.empty.hidden = false;
+        el.downloadCsv.disabled = true;
       }
 
       /* ---------- Render ---------- */
       function render({ list, total }) {
         el.app.classList.remove('is-loading');
+        el.downloadCsv.disabled = !list.length;
 
         const blockedCount = list.filter((c) => isBlocked(c.name)).reduce((s, c) => s + c.count, 0);
         const blockedPct = total > 0 ? (blockedCount / total) * 100 : 0;
@@ -743,6 +749,56 @@
         });
       }
 
+      /* ---------- CSV Export ---------- */
+      function downloadCsv() {
+        if (!lastData || !lastData.list || !lastData.list.length) {
+          showBanner('No analytics data available to download yet.');
+          return;
+        }
+
+        const rows = [
+          ['Client Name', 'Requests', 'Share (%)', 'Status']
+        ];
+
+        for (const c of lastData.list) {
+          const pct = lastData.total > 0 ? ((c.count / lastData.total) * 100).toFixed(1) + '%' : '0%';
+          const status = isBlocked(c.name) ? 'Blocked' : 'Allowed';
+          rows.push([c.name, c.count, pct, status]);
+        }
+
+        if (Array.isArray(lastData.requests) && lastData.requests.length > 0) {
+          rows.push([]);
+          rows.push(['--- Request History ---']);
+          rows.push(['Timestamp', 'Method', 'URL', 'Client', 'Status', 'User-Agent']);
+          for (const r of lastData.requests) {
+            rows.push([
+              r.timestamp || '',
+              r.method || '',
+              r.url || '',
+              r.client || '',
+              r.status || (isBlocked(r.client) ? 'Blocked' : 'Allowed'),
+              r.userAgent || ''
+            ]);
+          }
+        }
+
+        const csvContent = rows
+          .map((row) => row.map((val) => `"${String(val ?? '').replace(/"/g, '""')}"`).join(','))
+          .join('\r\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `user_agent_analytics_${dateStr}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
       /* ---------- Polling ---------- */
       function schedule() {
         clearTimeout(timer);
@@ -750,6 +806,7 @@
       }
 
       el.refresh.addEventListener('click', async () => { await load(); schedule(); });
+      el.downloadCsv.addEventListener('click', downloadCsv);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); schedule(); } });
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (lastData) renderChart(lastData.list); });
 

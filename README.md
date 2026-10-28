@@ -23,6 +23,7 @@ A modular RESTful API built with **Node.js** and **Express.js** featuring reques
 ## ✨ Features
 
 - **📊 Real-time Request Analytics**: Tracks every incoming HTTP request and parses client information dynamically using `ua-parser-js`.
+- **📥 CSV Data Export**: One-click download of analytics summary and request history as a CSV spreadsheet directly from the dashboard.
 - **🛡️ Bot & CLI Tool Blocking**: Automatically blocks unauthorized or command-line clients (e.g., `curl`, `wget`, `httpie`, `python-requests`) with `403 Forbidden`.
 - **🏷️ Blocked Client Analytics**: Logs blocked attempts under a dedicated `"Blocked Client"` counter while preserving historical details.
 - **🔐 Token Authentication**: Middleware-based token validation (`?token=123`) for sensitive endpoints.
